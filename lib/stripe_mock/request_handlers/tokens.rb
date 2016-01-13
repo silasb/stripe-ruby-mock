@@ -8,7 +8,7 @@ module StripeMock
       end
 
       def create_token(route, method_url, params, headers)
-        if params[:customer].nil? && params[:card].nil?
+        if params[:customer].nil? && params[:card].nil? && params[:bank_account].nil?
           raise Stripe::InvalidRequestError.new('You must supply either a card, customer, or bank account to create a token.', nil, 400)
         end
 
@@ -31,6 +31,8 @@ module StripeMock
           params[:card][:fingerprint] = StripeMock::Util.fingerprint(params[:card][:number])
           params[:card][:last4] = params[:card][:number][-4,4]
           customer_card = params[:card]
+        elsif params[:bank_account]
+          customer_card = params[:bank_account]
         else
           customer = assert_existence :customer, cus_id, customers[cus_id]
           customer_card = get_card(customer, customer[:default_source])
